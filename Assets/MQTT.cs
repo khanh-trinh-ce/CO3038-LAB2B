@@ -63,17 +63,27 @@ namespace Dashboard
         public data_ss humidity;
         public System.Random rnd;
 
+        public override void Connect()
+        {
+            base.Connect();
+            GameObject.Find("Manager").GetComponent<Manager>().ClearErrorMessage();
+        }
+
         protected override void OnConnecting()
         {
+            this.brokerAddress = "";
+            this.mqttUserName = "";
+            this.mqttPassword = "";
             GameObject g = GameObject.Find("Manager");
             this.brokerAddress = g.GetComponent<Manager>().GetBrokerText();
             this.mqttUserName = g.GetComponent<Manager>().GetUsernameText();
             this.mqttPassword = g.GetComponent<Manager>().GetPasswordText();
-            Debug.Log("Broker URI: " + this.brokerAddress);
-            Debug.Log("Username: " + this.mqttUserName);
-            Debug.Log("Password: " + this.mqttPassword);
-            g.GetComponent<Manager>().ClearErrorMessage();
             base.OnConnecting();
+        }
+
+        public override void Disconnect()
+        {
+            base.Disconnect();
         }
 
         protected override void OnConnected()
@@ -133,6 +143,7 @@ namespace Dashboard
         protected override void OnConnectionLost()
         {
             Debug.Log("CONNECTION LOST!");
+            Disconnect();
             GameObject g = GameObject.Find("Manager");
             g.GetComponent<Manager>().SwitchLayer();
         }
@@ -201,14 +212,10 @@ namespace Dashboard
             Debug.Log("Published Pump configurations.");
         }
 
-        public void UpdateConfig()
+        protected override void Start()
         {
 
-        }
-
-        public void UpdateControl()
-        {
-
+            base.Start();
         }
     }
 }
