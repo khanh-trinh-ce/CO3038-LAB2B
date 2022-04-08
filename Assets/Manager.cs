@@ -32,7 +32,9 @@ namespace Dashboard
         private Toggle LEDToggle;
         [SerializeField]
         private Toggle PumpToggle;
-
+        [SerializeField]
+        private ImgsFillDynamic Gauge;
+        
         private Tween twenFade;
 
 
@@ -62,9 +64,12 @@ namespace Dashboard
                         break;
                     case "humi":
                         HumiText.text = "HUMI: " + _data.ss_value + " " + _data.ss_unit;
+                        this.Gauge.SetValue(float.Parse(_data.ss_value) / 100f, false, 1f);
                         break;
                 }
             }
+
+            
         }
 
         public void DisplayErrorMessage()
@@ -148,6 +153,11 @@ namespace Dashboard
         public bool getPumpToggle()
         {
             return PumpToggle.isOn;
+        }
+
+        public void ClearErrorMessage()
+        {
+            ErrMsg.text = "";
         }
     }
 }

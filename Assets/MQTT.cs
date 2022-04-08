@@ -61,6 +61,7 @@ namespace Dashboard
 
         public data_ss temperature;
         public data_ss humidity;
+        public System.Random rnd;
 
         protected override void OnConnecting()
         {
@@ -71,6 +72,7 @@ namespace Dashboard
             Debug.Log("Broker URI: " + this.brokerAddress);
             Debug.Log("Username: " + this.mqttUserName);
             Debug.Log("Password: " + this.mqttPassword);
+            g.GetComponent<Manager>().ClearErrorMessage();
             base.OnConnecting();
         }
 
@@ -79,8 +81,9 @@ namespace Dashboard
             base.OnConnected();
             GameObject g = GameObject.Find("Manager");
             g.GetComponent<Manager>().SwitchLayer();
-            temperature = new data_ss("temp", "°C", "15");
-            humidity = new data_ss("humi", "%", "60");
+            rnd = new System.Random();
+            temperature = new data_ss("temp", "°C", rnd.Next(1, 100).ToString());
+            humidity = new data_ss("humi", "%", rnd.Next(1, 100).ToString());
 
             _status_data = new Status_Data();
             _status_data.data_ss.Add(temperature);
@@ -172,11 +175,11 @@ namespace Dashboard
         {
             if (GameObject.Find("Manager").GetComponent<Manager>().getLEDToggle())
             {
-                _config_data = new Config_Data("LED", "on");
+                _config_data = new Config_Data("LED", "ON");
             }
             else
             {
-                _config_data = new Config_Data("LED", "off");
+                _config_data = new Config_Data("LED", "OFF");
             }
             string msg_config = JsonConvert.SerializeObject(_config_data);
             client.Publish(topics[1], System.Text.Encoding.UTF8.GetBytes(msg_config), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, true);
@@ -187,11 +190,11 @@ namespace Dashboard
         {
             if (GameObject.Find("Manager").GetComponent<Manager>().getPumpToggle())
             {
-                _config_data = new Config_Data("Pump", "on");
+                _config_data = new Config_Data("PUMP", "ON");
             }
             else
             {
-                _config_data = new Config_Data("Pump", "off");
+                _config_data = new Config_Data("PUMP", "OFF");
             }
             string msg_config = JsonConvert.SerializeObject(_config_data);
             client.Publish(topics[2], System.Text.Encoding.UTF8.GetBytes(msg_config), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, true);
