@@ -23,6 +23,7 @@ public class ImgsFillDynamic : MonoBehaviour
 
     public Text TxtValue;
     public float MultifyText = 100F;
+    [SerializeField]
     public string TailText = "%";
 
     /// <summary>

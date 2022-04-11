@@ -33,7 +33,9 @@ namespace Dashboard
         [SerializeField]
         private Toggle PumpToggle;
         [SerializeField]
-        private ImgsFillDynamic Gauge;
+        private ImgsFillDynamic TempGauge;
+        [SerializeField]
+        private ImgsFillDynamic HumiGauge;
         
         private Tween twenFade;
 
@@ -61,10 +63,11 @@ namespace Dashboard
                 {
                     case "temp":
                         TempText.text = "TEMP: " + _data.ss_value + " " + _data.ss_unit;
+                        this.TempGauge.SetValue(float.Parse(_data.ss_value) / 100f, true, 1f);
                         break;
                     case "humi":
                         HumiText.text = "HUMI: " + _data.ss_value + " " + _data.ss_unit;
-                        this.Gauge.SetValue(float.Parse(_data.ss_value) / 100f, false, 1f);
+                        this.HumiGauge.SetValue(float.Parse(_data.ss_value) / 100f, true, 1f);
                         break;
                 }
             }
