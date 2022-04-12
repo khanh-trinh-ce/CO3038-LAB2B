@@ -14,21 +14,21 @@ namespace Dashboard
 {
     public class Status_Data
     {
-        public List<data_ss> data_ss { get; set; }
+        public List<Data_Series> data_series { get; set; }
         public Status_Data()
         {
-            this.data_ss = new List<data_ss>();
+            this.data_series = new List<Data_Series>();
         }
         
     }
 
-    public class data_ss
+    public class Data_Series
     {
         public string ss_name { get; set; }
         public string ss_unit { get; set; }
         public string ss_value { get; set; }
 
-        public data_ss(string name, string unit, string value)
+        public Data_Series(string name, string unit, string value)
         {
             ss_name = name;
             ss_unit = unit;
@@ -59,25 +59,23 @@ namespace Dashboard
         [SerializeField]
         public Config_Data _config_data;
 
-        public data_ss temperature;
-        public data_ss humidity;
+        public Data_Series temperature;
+        public Data_Series humidity;
         public System.Random rnd;
 
         public override void Connect()
         {
             base.Connect();
-            GameObject.Find("Manager").GetComponent<Manager>().ClearErrorMessage();
+            GameObject manager = GameObject.Find("Manager");
+            manager.GetComponent<Manager>().ClearErrorMessage();
+            this.brokerAddress = manager.GetComponent<Manager>().GetBrokerText();
+            this.mqttUserName = manager.GetComponent<Manager>().GetUsernameText();
+            this.mqttPassword = manager.GetComponent<Manager>().GetPasswordText();
         }
 
         protected override void OnConnecting()
         {
-            this.brokerAddress = "";
-            this.mqttUserName = "";
-            this.mqttPassword = "";
-            GameObject g = GameObject.Find("Manager");
-            this.brokerAddress = g.GetComponent<Manager>().GetBrokerText();
-            this.mqttUserName = g.GetComponent<Manager>().GetUsernameText();
-            this.mqttPassword = g.GetComponent<Manager>().GetPasswordText();
+
             base.OnConnecting();
         }
 
@@ -88,16 +86,16 @@ namespace Dashboard
 
         protected override void OnConnected()
         {
+            GameObject manager = GameObject.Find("Manager");
             base.OnConnected();
-            GameObject g = GameObject.Find("Manager");
-            g.GetComponent<Manager>().SwitchLayer();
+            manager.GetComponent<Manager>().SwitchLayer();
             rnd = new System.Random();
-            temperature = new data_ss("temp", "°C", rnd.Next(1, 100).ToString());
-            humidity = new data_ss("humi", "%", rnd.Next(1, 100).ToString());
+            temperature = new Data_Series("temp", "°C", rnd.Next(1, 100).ToString());
+            humidity = new Data_Series("humi", "%", rnd.Next(1, 100).ToString());
 
             _status_data = new Status_Data();
-            _status_data.data_ss.Add(temperature);
-            _status_data.data_ss.Add(humidity);
+            _status_data.data_series.Add(temperature);
+            _status_data.data_series.Add(humidity);
             string msg_test = JsonConvert.SerializeObject(_status_data);
             Debug.Log("The bytes: " + msg_test);
             client.Publish(topics[0], System.Text.Encoding.UTF8.GetBytes(msg_test), MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, true);
@@ -128,24 +126,23 @@ namespace Dashboard
 
         protected override void OnConnectionFailed(string ErrorMessage)
         {
-            Debug.Log("CONNECTION FAILED! " + ErrorMessage);
-            GameObject g = GameObject.Find("Manager");
-            g.GetComponent<Manager>().DisplayErrorMessage();
+            GameObject manager = GameObject.Find("Manager");
+            manager.GetComponent<Manager>().DisplayErrorMessage();
         }
 
         protected override void OnDisconnected()
         {
+            GameObject manager = GameObject.Find("Manager");
             Debug.Log("Disconnected.");
-            GameObject g = GameObject.Find("Manager");
-            g.GetComponent<Manager>().SwitchLayer();
+            manager.GetComponent<Manager>().SwitchLayer();
         }
 
         protected override void OnConnectionLost()
         {
+            GameObject manager = GameObject.Find("Manager");
             Debug.Log("CONNECTION LOST!");
             Disconnect();
-            GameObject g = GameObject.Find("Manager");
-            g.GetComponent<Manager>().SwitchLayer();
+            manager.GetComponent<Manager>().SwitchLayer();
         }
 
         public void SetEncrypted(bool isEncrypted)
@@ -164,8 +161,9 @@ namespace Dashboard
 
         private void ProcessMessageStatus(string msg)
         {
+            GameObject manager = GameObject.Find("Manager");
             _status_data = JsonConvert.DeserializeObject<Status_Data>(msg);
-            GameObject.Find("Manager").GetComponent<Manager>().Update_Status(_status_data);
+            manager.GetComponent<Manager>().Update_Status(_status_data);
 
         }
 
@@ -174,17 +172,10 @@ namespace Dashboard
             Disconnect();
         }
 
-        private void OnValidate()
-        {
-            //if (autoTest)
-            //{
-            //    autoConnect = true;
-            //}
-        }
-
         public void PublishConfigLED()
         {
-            if (GameObject.Find("Manager").GetComponent<Manager>().getLEDToggle())
+            GameObject manager = GameObject.Find("Manager");
+            if (manager.GetComponent<Manager>().getLEDToggle())
             {
                 _config_data = new Config_Data("LED", "ON");
             }
@@ -199,7 +190,8 @@ namespace Dashboard
 
         public void PublishConfigPump()
         {
-            if (GameObject.Find("Manager").GetComponent<Manager>().getPumpToggle())
+            GameObject manager = GameObject.Find("Manager");
+            if (manager.GetComponent<Manager>().getPumpToggle())
             {
                 _config_data = new Config_Data("PUMP", "ON");
             }
@@ -214,7 +206,6 @@ namespace Dashboard
 
         protected override void Start()
         {
-
             base.Start();
         }
     }

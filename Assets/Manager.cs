@@ -49,15 +49,9 @@ namespace Dashboard
             Layer2.blocksRaycasts = false;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
         public void Update_Status(Status_Data _status_data)
         {
-            foreach (data_ss _data in _status_data.data_ss)
+            foreach (Data_Series _data in _status_data.data_series)
             {
                 switch (_data.ss_name)
                 {
